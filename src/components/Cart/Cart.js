@@ -8,6 +8,10 @@ import Checkout from "./Checkout";
 
 const Cart = (props) => {
   const [isCheckout, setIsCheckout] = useState(false);
+  const [isSumitting, setSubmitting] = useState(false);
+  const [didSumit, setDidSubmit] = useState(false);
+  const [httpError, setHttpError] = useState();
+
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
@@ -23,6 +27,33 @@ const Cart = (props) => {
 
   const orderHandler = () => {
     setIsCheckout(true);
+  };
+
+  const submitOrderHandler = async (userData) => {
+    try {
+      setSubmitting(true);
+      const response = await fetch(
+        "https://order-food-e7076-default-rtdb.firebaseio.com/order.json",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            user: userData,
+            orderItems: cartCtx.items,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Something went wrong sending the data!");
+      }
+    } catch (error) {
+      setSubmitting(false);
+      setHttpError(error.message);
+    }
+
+    setSubmitting(false);
+    setDidSubmit(true);
+    cartCtx.clearCart();
   };
 
   const cartItems = (
@@ -53,15 +84,47 @@ const Cart = (props) => {
     </div>
   );
 
-  return (
-    <Modal onClose={props.onClose}>
+  const cartModalContent = (
+    <>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      {isCheckout && <Checkout onCancel={props.onClose} />}
+      {isCheckout && (
+        <Checkout onConfirm={submitOrderHandler} onCancel={props.onClose} />
+      )}
       {!isCheckout && modalActions}
+    </>
+  );
+
+  const isSubmittingModalContent = <p>Sending order data...</p>;
+  const didSumitModalContent = (
+    <>
+      <p>successfull sent the order</p>
+      <div className={classes.actions}>
+        <button className={classes.button} onClick={props.onClose}>
+          Close
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <Modal onClose={props.onClose}>
+      {!isSumitting && !didSumit && cartModalContent}
+      {isSumitting && isSubmittingModalContent && !httpError}
+      {!isSumitting && didSumit && !httpError && didSumitModalContent}
+      {httpError && (
+        <>
+          <p>{httpError}</p>
+          <div className={classes.actions}>
+            <button className={classes.button} onClick={props.onClose}>
+              Close
+            </button>
+          </div>
+        </>
+      )}
     </Modal>
   );
 };

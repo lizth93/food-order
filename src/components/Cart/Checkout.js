@@ -50,7 +50,12 @@ const Checkout = (props) => {
       return;
     }
 
-    console.log(nameInput, streetInput, postalInput);
+    props.onConfirm({
+      name: nameInput,
+      street: streetInput,
+      city: cityInput,
+      postalCode: postalInput,
+    });
 
     event.preventDefault();
     resetNameInput();
