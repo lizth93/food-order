@@ -1,42 +1,62 @@
+import { useEffect, useState } from "react";
+
 import Card from "../UI/Card";
 import MealItem from "./MealItem/MealItem";
 import classes from "./AvailableMeals.module.css";
-import { useEffect, useState } from "react";
 
 const AvailableMeals = () => {
   const [meals, setMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [errorHttpRequest, setErrorHttpRequest] = useState();
+  const [httpError, setHttpError] = useState();
+
   useEffect(() => {
-    const fetchMealsHandler = async () => {
+    const fetchMeals = async () => {
       const response = await fetch(
         "https://order-food-e7076-default-rtdb.firebaseio.com/meals.json/"
       );
 
       if (!response.ok) {
-        throw new Error("something when wrong");
+        throw new Error("Something went wrong!");
       }
 
       const responseData = await response.json();
 
       const loadedMeals = [];
+
       for (const key in responseData) {
         loadedMeals.push({
-          id: key.id,
+          id: key,
           name: responseData[key].name,
           description: responseData[key].description,
           price: responseData[key].price,
         });
       }
+
       setMeals(loadedMeals);
       setIsLoading(false);
     };
 
-    fetchMealsHandler().catch((error) => {
+    fetchMeals().catch((error) => {
       setIsLoading(false);
-      setErrorHttpRequest(error.message);
+      setHttpError(error.message);
     });
   }, []);
+
+  if (isLoading) {
+    return (
+      <section className={classes.MealsLoading}>
+        <p>Loading...</p>
+      </section>
+    );
+  }
+
+  if (httpError) {
+    return (
+      <section className={classes.MealsError}>
+        <p>{httpError}</p>
+      </section>
+    );
+  }
 
   const mealsList = meals.map((meal) => (
     <MealItem
@@ -48,21 +68,6 @@ const AvailableMeals = () => {
     />
   ));
 
-  if (isLoading) {
-    return (
-      <section className={classes.mealsLoading}>
-        <p>Loading...</p>
-      </section>
-    );
-  }
-
-  if (errorHttpRequest) {
-    return (
-      <section className={classes.mealsError}>
-        <p>{errorHttpRequest}</p>
-      </section>
-    );
-  }
   return (
     <section className={classes.meals}>
       <Card>
