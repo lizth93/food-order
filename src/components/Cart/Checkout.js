@@ -7,11 +7,11 @@ const Checkout = (props) => {
   const validatePostalInput = (value) => value.trim().length === 5;
 
   const {
-    value: nameInput,
+    value: name,
     isValid: isValidName,
     hasError: hasErrorName,
-    inputChangeHandler: nameInputHandler,
-    inputOnBlurHandler: nameOnBlurHandler,
+    inputChangeHandler: handleNameInput,
+    inputOnBlurHandler: handleNameInputBlur,
     reset: resetNameInput,
   } = useInput(validateTextInputs);
 
@@ -51,7 +51,7 @@ const Checkout = (props) => {
     }
 
     props.onConfirm({
-      name: nameInput,
+      name: name,
       street: streetInput,
       city: cityInput,
       postalCode: postalInput,
@@ -64,25 +64,25 @@ const Checkout = (props) => {
     resetCityInput();
   };
 
-  const classNameResult = useClassName(hasErrorName);
-  const classStreetResult = useClassName(hasErrorStreet);
-  const classPostalResult = useClassName(hasErrorPostal);
-  const classCityResult = useClassName(hasErrorCity);
+  const nameClassResult = useClassName(hasErrorName);
+  const streetClassResult = useClassName(hasErrorStreet);
+  const postalClassName = useClassName(hasErrorPostal);
+  const cityClassName = useClassName(hasErrorCity);
 
   return (
     <form className="form" onSubmit={confirmHandler}>
-      <div className={classNameResult}>
+      <div className={nameClassResult}>
         <label htmlFor="name">Your Name</label>
         <input
           type="text"
           id="name"
-          onChange={nameInputHandler}
-          onBlur={nameOnBlurHandler}
-          value={nameInput}
+          onChange={handleNameInput}
+          onBlur={handleNameInputBlur}
+          value={name}
         />
         {hasErrorName && <p>Please enter your name</p>}
       </div>
-      <div className={classStreetResult}>
+      <div className={streetClassResult}>
         <label htmlFor="street">Street</label>
         <input
           type="text"
@@ -93,7 +93,7 @@ const Checkout = (props) => {
         />
         {hasErrorStreet && <p>Please enter a valid Street</p>}
       </div>
-      <div className={classPostalResult}>
+      <div className={postalClassName}>
         <label htmlFor="postal">Postal Code</label>
         <input
           type="text"
@@ -104,7 +104,7 @@ const Checkout = (props) => {
         />
         {hasErrorPostal && <p>Please enter a valid Postal number</p>}
       </div>
-      <div className={classCityResult}>
+      <div className={cityClassName}>
         <label htmlFor="city">City</label>
         <input
           type="text"
